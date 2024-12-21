@@ -5,8 +5,8 @@ import restSound from './mp3/rest.mp3';
 import './App.css'; 
 
 const App = () => {
-  const workTime = 25 * 60;
-  const restTime = 5 * 60;
+  const workTime = 5;
+  const restTime = 5;
   const [time, setTime] = useState(workTime); 
   const [isActive, setIsActive] = useState(false);
   const [isRest, setIsRest] = useState(false); // 休憩中かどうか
@@ -67,12 +67,33 @@ const App = () => {
 
   const progress = (time / (isRest ? restTime : workTime)) * 100;
 
+  const getColorCode = (color: string) => {
+    switch (color) {
+      case 'red':
+        return '#ff6347';
+      case 'blue':
+        return '#4169e1';
+      case 'green':
+        return '#2e8b57';
+      default:
+        return '#3cb371';
+    }
+  };
+
+  const getStatusMessage = () => {
+    if (isActive) {
+      return isRest ? '休憩中' : '作業中';
+    } else {
+      return '一時停止';
+    }
+  };
+
   return (
     <>
     <div className="app">
-    <h3>{isRest? '休憩中' : '作業中'}</h3>
+    <h3>{getStatusMessage()}</h3>
       <div className="timer"> 
-        <div className="pie" style={{ background: `conic-gradient(${color} ${progress}%, #ddd ${progress}%)` }}>
+        <div className="pie" style={{ background: `conic-gradient(${getColorCode(color)} ${progress}%, #ddd ${progress}%)` }}>
           <div className="time">{formatTime(time)}</div>
         </div>
       </div>
