@@ -2,83 +2,103 @@ import React, { useState, useEffect } from 'react';
 import { useSound } from 'use-sound';
 import workSound from './mp3/work.mp3';
 import restSound from './mp3/rest.mp3';
-import './App.css'; 
+import './App.css';
 
-const App = () => {
-  const workTime = 5;
-  const restTime = 5;
-  const [time, setTime] = useState(workTime); 
+const WORK_TIME = 5; // 25 minutes
+const REST_TIME = 5; // 5 minutes
+
+const getColorCode = (color: string) => {
+  switch (color) {
+    case 'red':
+      return '#ff6347';
+    case 'blue':
+      return '#4169e1';
+    case 'green':
+      return '#3cb371';
+    default:
+      return '#3cb371';
+  }
+};
+
+const formatTime = (time: number) => {
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+};
+
+const useTimer = (initialTime: number, isRest: boolean, onWorkEnd: () => void, onRestEnd: () => void) => {
+  const [time, setTime] = useState(initialTime);
   const [isActive, setIsActive] = useState(false);
-  const [isRest, setIsRest] = useState(false); // 休憩中かどうか
-  const [count, setCount] = useState(0); // 何ポモドーロ目か
-  const [workSoundPlay] = useSound(workSound);
-  const [restSoundPlay] = useSound(restSound);
-  const [color, setColor] = useState('green');
 
   useEffect(() => {
-    let interval: number | null  = null;
+    let interval: number | null = null;
 
-    if (isActive && time > 0) {
+    if (isActive) {
       interval = window.setInterval(() => {
-        setTime(time => time - 1);
+        setTime((prevTime) => {
+          if (prevTime === 0) {
+            if (isRest) {
+              onRestEnd();
+              return WORK_TIME;
+            } else {
+              onWorkEnd();
+              return REST_TIME;
+            }
+          }
+          return prevTime - 1;
+        });
       }, 1000);
-    } else if (time === 0) {
-      if (interval !== null) {
-        clearInterval(interval);
-      }
-      setIsRest(!isRest);
-      setTime(isRest ? workTime : restTime); 
-      if (!isRest) {
-        setCount(count => count + 1);
-        
-      }
-      if (isRest) {
-        restSoundPlay();
-      }else{
-        workSoundPlay();
-      }
     }
+
     return () => {
       if (interval !== null) {
         clearInterval(interval);
       }
     };
-  }, [isActive, time, isRest]);
+  }, [isActive, isRest, onWorkEnd, onRestEnd]);
 
   const toggleActive = () => {
     setIsActive(!isActive);
   };
 
+  const reset = () => {
+    setIsActive(false);
+    setTime(initialTime);
+  };
+
+  return { time, isActive, toggleActive, reset };
+};
+
+const App = () => {
+  const [isRest, setIsRest] = useState(false);
+  const [count, setCount] = useState(0);
+  const [workSoundPlay] = useSound(workSound);
+  const [restSoundPlay] = useSound(restSound);
+  const [color, setColor] = useState('green');
+
+  const handleWorkEnd = () => {
+    setIsRest(true);
+    setCount((prevCount) => prevCount + 1);
+    restSoundPlay();
+  };
+
+  const handleRestEnd = () => {
+    setIsRest(false);
+    workSoundPlay();
+  };
+
+  const { time, isActive, toggleActive, reset } = useTimer(
+    isRest ? REST_TIME : WORK_TIME,
+    isRest,
+    handleWorkEnd,
+    handleRestEnd
+  );
+
   const handleColorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setColor(event.target.value);
   };
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
-  const reset = () => {
-    setTime(isRest ? restTime : workTime);
-    setIsActive(false);
-    setCount(0);
-  };
-
-  const progress = (time / (isRest ? restTime : workTime)) * 100;
-
-  const getColorCode = (color: string) => {
-    switch (color) {
-      case 'red':
-        return '#ff6347';
-      case 'blue':
-        return '#4169e1';
-      case 'green':
-        return '#2e8b57';
-      default:
-        return '#3cb371';
-    }
-  };
+  const progress = (time / (isRest ? REST_TIME : WORK_TIME)) * 100;
 
   const getStatusMessage = () => {
     if (isActive) {
@@ -89,10 +109,9 @@ const App = () => {
   };
 
   return (
-    <>
     <div className="app">
-    <h3>{getStatusMessage()}</h3>
-      <div className="timer"> 
+      <h3>{getStatusMessage()}</h3>
+      <div className="timer">
         <div className="pie" style={{ background: `conic-gradient(${getColorCode(color)} ${progress}%, #ddd ${progress}%)` }}>
           <div className="time">{formatTime(time)}</div>
         </div>
@@ -106,7 +125,6 @@ const App = () => {
         <option value="green">緑</option>
       </select>
     </div>
-    </>
   );
 };
 
