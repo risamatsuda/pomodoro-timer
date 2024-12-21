@@ -4,8 +4,8 @@ import workSound from './mp3/work.mp3';
 import restSound from './mp3/rest.mp3';
 import './App.css';
 
-const WORK_TIME = 5; // 25 minutes
-const REST_TIME = 5; // 5 minutes
+const WORK_TIME = 25 * 60; // 25 minutes
+const REST_TIME = 5 * 60; // 5 minutes
 
 const getColorCode = (color: string) => {
   switch (color) {
