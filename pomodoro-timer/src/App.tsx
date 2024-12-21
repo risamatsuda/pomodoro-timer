@@ -1,11 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { useSound } from 'use-sound';
 import workSound from './mp3/work.mp3';
 import restSound from './mp3/rest.mp3';
 import './App.css';
-
-const WORK_TIME = 25 * 60; // 25 minutes
-const REST_TIME = 5 * 60; // 5 minutes
 
 const getColorCode = (color: string) => {
   switch (color) {
@@ -35,6 +32,10 @@ const useTimer = (
   const [time, setTime] = useState(initialTime);
   const [isActive, setIsActive] = useState(false);
 
+  useLayoutEffect(() => {
+    setTime(initialTime);
+  }, [initialTime]);
+
   useEffect(() => {
     let interval: number | null = null;
 
@@ -44,10 +45,10 @@ const useTimer = (
           if (prevTime === 0) {
             if (isRest) {
               onRestEnd();
-              return WORK_TIME;
+              return initialTime;
             } else {
               onWorkEnd();
-              return REST_TIME;
+              return initialTime;
             }
           }
           return prevTime - 1;
@@ -60,7 +61,7 @@ const useTimer = (
         clearInterval(interval);
       }
     };
-  }, [isActive, isRest, onWorkEnd, onRestEnd]);
+  }, [isActive, isRest, onWorkEnd, onRestEnd, initialTime]);
 
   const toggleActive = () => {
     setIsActive(!isActive);
@@ -80,6 +81,8 @@ const App = () => {
   const [workSoundPlay] = useSound(workSound);
   const [restSoundPlay] = useSound(restSound);
   const [color, setColor] = useState('green');
+  const [workMinutes, setWorkMinutes] = useState(25);
+  const restMinutes = 5;
 
   const handleWorkEnd = () => {
     setIsRest(true);
@@ -93,7 +96,7 @@ const App = () => {
   };
 
   const { time, isActive, toggleActive, reset } = useTimer(
-    isRest ? REST_TIME : WORK_TIME,
+    isRest ? restMinutes * 60 : workMinutes * 60,
     isRest,
     handleWorkEnd,
     handleRestEnd,
@@ -103,7 +106,14 @@ const App = () => {
     setColor(event.target.value);
   };
 
-  const progress = (time / (isRest ? REST_TIME : WORK_TIME)) * 100;
+  const handleWorkMinutesChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setWorkMinutes(Number(event.target.value));
+  };
+
+  const progress =
+    (time / (isRest ? restMinutes * 60 : workMinutes * 60)) * 100;
 
   const getStatusMessage = () => {
     if (isActive) {
@@ -128,6 +138,15 @@ const App = () => {
       </div>
       <button onClick={toggleActive}>{isActive ? '⏸' : '▶'}</button>
       <button onClick={reset}>リセット</button>
+      <section>
+        <label>
+          作業時間:
+          <select value={workMinutes} onChange={handleWorkMinutesChange}>
+            <option value={15}>15分</option>
+            <option value={25}>25分</option>
+          </select>
+        </label>
+      </section>
       <p>現在 {count} ポモドーロ</p>
       <select value={color} onChange={handleColorChange}>
         <option value="red">赤</option>
