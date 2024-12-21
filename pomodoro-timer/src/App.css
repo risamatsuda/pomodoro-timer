@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   height: 100%;
   margin: 0;
   display: flex;
@@ -28,7 +29,7 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: conic-gradient(#ff0000 0%, #c0c0c0 0% );
+  background: conic-gradient(#ff0000 0%, #c0c0c0 0%);
 }
 
 .time {

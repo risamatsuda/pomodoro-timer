@@ -26,7 +26,12 @@ const formatTime = (time: number) => {
   return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 };
 
-const useTimer = (initialTime: number, isRest: boolean, onWorkEnd: () => void, onRestEnd: () => void) => {
+const useTimer = (
+  initialTime: number,
+  isRest: boolean,
+  onWorkEnd: () => void,
+  onRestEnd: () => void,
+) => {
   const [time, setTime] = useState(initialTime);
   const [isActive, setIsActive] = useState(false);
 
@@ -91,7 +96,7 @@ const App = () => {
     isRest ? REST_TIME : WORK_TIME,
     isRest,
     handleWorkEnd,
-    handleRestEnd
+    handleRestEnd,
   );
 
   const handleColorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -112,7 +117,12 @@ const App = () => {
     <div className="app">
       <h3>{getStatusMessage()}</h3>
       <div className="timer">
-        <div className="pie" style={{ background: `conic-gradient(${getColorCode(color)} ${progress}%, #ddd ${progress}%)` }}>
+        <div
+          className="pie"
+          style={{
+            background: `conic-gradient(${getColorCode(color)} ${progress}%, #ddd ${progress}%)`,
+          }}
+        >
           <div className="time">{formatTime(time)}</div>
         </div>
       </div>
