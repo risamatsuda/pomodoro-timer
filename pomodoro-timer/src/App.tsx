@@ -147,7 +147,7 @@ const App = () => {
           </select>
         </label>
       </section>
-      <p>現在 {count} ポモドーロ</p>
+      <p>ポモドーロ回数: {Array(count).fill('🍅').join('')}</p>
       <select value={color} onChange={handleColorChange}>
         <option value="red">赤</option>
         <option value="blue">青</option>
