@@ -6,7 +6,7 @@
 
 ## デモリンク
 こちらのリンクから実際に使ってみることができます<br>
-https://your-username.github.io/pomodoro-timer
+https://risamatsuda.github.io/pomodoro-timer
 <br>
 
 ## スクリーンショット
